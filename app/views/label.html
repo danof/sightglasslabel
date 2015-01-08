@@ -1,0 +1,50 @@
+<input ng-model="label.name" type="text" class="form-control input-h3">
+
+<p class="show-hide" ng-show="units"><a href ng-click="addMeasurement()"><i class="fa fa-plus"></i> Add Measurement</a></p>
+
+<div class="measurement-selection show-hide" ng-hide="units">
+	<ul class="list-inline">
+		<li><input type="radio" ng-model="units" value="standard"> U.S. Customary</li>
+		<li><input type="radio" ng-model="units" value="metric"> Metric</li>
+		<li>{{units}}</li>
+	</ul>
+	<div class="units-note">
+		<object type="image/svg+xml" data="images/arrow.svg">no svg support</object>
+		<p>to begin, choose a measurement system</p>
+	</div>
+</div>
+
+<table class="table table-bordered table-hover show-hide measurements-table" ng-show="measurements.length > 0">
+	<thead>
+		<tr>
+			<th>Volume</th>
+			<th colspan="2">Level</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="measurement in measurements | orderBy:'-volume'" class="repeated-item">
+			<td>{{measurement.volume}} {{volumeUnit}}</td>
+			<td>
+				<div class="measurement-height">{{measurement.height | fraction:units}}</div>
+				<div class="measurement-controls">
+					<a class="measurement-control increase" ng-mousedown="increaseMeasurement(measurement)" ng-mouseup="stopMeasurementTimer()"><i class="fa fa-caret-up fa-lg"></i></a>
+					<a class="measurement-control decrease" ng-mousedown="decreaseMeasurement(measurement)" ng-mouseup="stopMeasurementTimer()"><i class="fa fa-caret-down fa-lg"></i></a>
+				</div>
+			</td>
+			<td class="text-right">
+				<a href ng-show="measurements.length === measurements.length - $index" ng-click="removeMeasurement()"><i class="fa fa-times"></i> <span class="hidden-sm hidden-xs">Remove Measurement</span></a>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<div ng-show="measurements.length > 0" class="show-hide row">
+	<div class="col-xs-6">
+		<a href ng-click="pdfLabel()" class="btn btn-primary">Print</a> <a href ng-click="saveLabel()" ng-show="signedIn()" class="btn btn-primary">Save</a>
+	</div>
+	<div class="col-xs-6 text-right">
+		<a href ng-click="clearMeasurements()" class="btn btn-primary">Start Over</a>
+	</div>
+</div>
+
+<div ng-show="saved" class="alert alert-success show-hide" role="alert"><span class="glyphicon glyphicon-ok"></span> Your label is saved!</div>

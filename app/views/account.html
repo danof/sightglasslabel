@@ -1,0 +1,40 @@
+<section>	
+	<h3>Saved Labels</h3>
+		
+	<table class="table table-hover show-hide account-table">
+		<tbody>
+			<tr ng-repeat="(labelId, label) in labels" class="repeated-item">
+				<td>
+					<a href="#/label/{{labelId}}">{{label.name}}</a>
+				</td>
+				<td class="text-right">
+					<a href ng-click="deleteLabel(labelId)"><i class="fa fa-times"></i> <span class="hidden-sm hidden-xs">Delete Label</span></a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<p><a href="#/label" class="btn btn-primary">Create New Label</a></p>
+</section>
+
+<section>	
+	<h3>Change Password</h3>
+	
+	<div ng-show="success" class="alert alert-success show-hide" role="alert">
+		<span class="glyphicon glyphicon-ok"></span> Your password has been changed.
+	</div>
+	
+	<div ng-show="error" class="alert alert-danger show-hide" role="alert">
+		{{error}}
+	</div>
+	
+	<form ng-submit="changePassword()" role="form">
+		<div class="form-group">
+			<input type="password" ng-model="user.oldPassword" placeholder="Old Password" class="form-control">
+		</div>
+		<div class="form-group">
+			<input type="password" ng-model="user.newPassword" placeholder="New Password" class="form-control">
+		</div>
+		<input type="submit" value="Change Password" class="btn btn-primary">
+	</form>
+</section>
