@@ -3,15 +3,21 @@ A simple app to create custom, printable sightglass labels for homebrewing. Buil
 
 To get this up and going, using your terminal, navigate to the downloaded/cloned directory. Run the following:
 
-  npm install
+```
+npm install
+```
 
 Then run:
 
-  bower install
+```
+bower install
+```
 
 Then run:
 
-  grunt serve
+```
+grunt serve
+```
   
 This was built using the Yeoman Angular generator: https://github.com/yeoman/generator-angular
 
