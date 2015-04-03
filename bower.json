@@ -21,7 +21,7 @@
   },
   "overrides": {
     "fraction.js": {
-      "main": "fraction.js"
+      "main": "index.js"
     }
   },
   "devDependencies": {

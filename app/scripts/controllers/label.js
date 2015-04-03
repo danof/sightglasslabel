@@ -31,7 +31,7 @@ angular.module('sightglasslabelApp')
 		$scope.label = {};
 		$scope.label.name = $scope.name;
 		$scope.label.measurements = $scope.measurements;
-		
+
 		$scope.$watch('units', function(value) {
 			if (value === 'standard') {
 				$scope.volumeUnit = 'gal';
@@ -46,12 +46,12 @@ angular.module('sightglasslabelApp')
 				$scope.measurementMax = 45;
 				$scope.measurementStep = 0.1;
 			}
-			
+
 			if (value && $scope.measurements.length === 0) {
 				$scope.addMeasurement();
 			}
 		});
-		
+
 		$scope.addMeasurement = function() {
 			var nextVolume = ($scope.units === 'standard') ? 1 : 2;
 			var previousHeight = 0;
@@ -62,13 +62,13 @@ angular.module('sightglasslabelApp')
 			$scope.measurements.push({volume:nextVolume, height:previousHeight});
 			$scope.saved = false;
 		};
-		
+
 		var measurementTimer;
 		var measurementTimeout;
-		
+
 		$scope.increaseMeasurement = function(input) {
 			var index = $scope.measurements.indexOf(input);
-			
+
 			var incrementMeasurement = function() {
 				if ($scope.measurements[index].height >= $scope.measurementMax) {
 					$scope.measurements[index].height = $scope.measurementMax;
@@ -76,9 +76,9 @@ angular.module('sightglasslabelApp')
 					$scope.measurements[index].height += $scope.measurementStep;
 				}
 			};
-			
+
 			incrementMeasurement();
-			
+
 			measurementTimeout = setTimeout(function() {
 				measurementTimer = setInterval(function() {
 					$scope.$apply(incrementMeasurement());
@@ -90,7 +90,7 @@ angular.module('sightglasslabelApp')
 
 		$scope.decreaseMeasurement = function(input) {
 			var index = $scope.measurements.indexOf(input);
-			
+
 			var decrementMeasurement = function() {
 				if ($scope.measurements[index].height <= $scope.measurementMin) {
 					$scope.measurements[index].height = $scope.measurementMin;
@@ -98,9 +98,9 @@ angular.module('sightglasslabelApp')
 					$scope.measurements[index].height -= $scope.measurementStep;
 				}
 			};
-			
+
 			decrementMeasurement();
-			
+
 			measurementTimeout = setTimeout(function() {
 				measurementTimer = setInterval(function() {
 					$scope.$apply(decrementMeasurement());
@@ -109,7 +109,7 @@ angular.module('sightglasslabelApp')
 
 			$scope.saved = false;
 		};
-		
+
 		$scope.stopMeasurementTimer = function() {
 			clearTimeout(measurementTimeout);
 			clearInterval(measurementTimer);
@@ -119,7 +119,7 @@ angular.module('sightglasslabelApp')
 			$scope.measurements.pop();
 			$scope.saved = false;
 		};
-		
+
 		$scope.clearMeasurements = function() {
 			$scope.measurements = [];
 			$scope.units = '';
@@ -146,24 +146,47 @@ angular.module('sightglasslabelApp')
 		};
 
 		$scope.pdfLabel = function() {
-			var startX = 1;
-			var startY = 1;
-			var width = 0.375;
-			var height = 9;
-			var maxHeight = $scope.measurements[$scope.measurements.length-1].height;
-			var topBuffer = 0.125;
 
-			var lineWidth = 0.007;
-			var lineLength = 0.09375;
-			var lineBuffer = 0.03125;
+			if ($scope.units === 'standard') { // change defaults based on measurement system (standard or metric)
+				var startX = 1;
+				var startY = 1;
+				var width = 0.375;
+				var height = 9;
+				var maxHeight = $scope.measurements[$scope.measurements.length-1].height;
+				var topBuffer = 0.125;
 
-			var cropMarkLength = 0.125;
-			var cropMarkBuffer = 0.0625;
+				var lineWidth = 0.007;
+				var lineLength = 0.09375;
+				var lineBuffer = 0.03125;
 
-			var fontSize = 8;
-			var fontSizeUnits = fontSize/72;
+				var cropMarkLength = 0.125;
+				var cropMarkBuffer = 0.0625;
 
-			var doc = new jsPDF('p', 'in', 'letter');
+				var fontSize = 8;
+				var fontSizeUnits = fontSize/72;
+
+				var doc = new jsPDF('p', 'in', 'letter');
+
+			} else if ($scope.units === 'metric') {
+				var startX = 2.54;
+				var startY = 2.54;
+				var width = 0.9525;
+				var height = 24.62;
+				var maxHeight = $scope.measurements[$scope.measurements.length-1].height;
+				var topBuffer = 0.3175;
+
+				var lineWidth = 0.01778;
+				var lineLength = 0.238125;
+				var lineBuffer = 0.079375;
+
+				var cropMarkLength = 0.3175;
+				var cropMarkBuffer = 0.15875;
+
+				var fontSize = 8;
+				var fontSizeUnits = fontSize*0.0352777778;
+
+				var doc = new jsPDF('p', 'cm'); // defaults to A4 page size
+			}
 
 			doc.setLineWidth(lineWidth);
 			doc.setFontSize(fontSize);
@@ -215,71 +238,71 @@ angular.module('sightglasslabelApp')
 			}
 
 			doc.setDrawColor(0,0,0);
-			
+
 			var first = true;
-			
+
 			for(var i=0; i<$scope.measurements.length; i++) {
 
 				var interval = 0;
 				var measurementY = startY+height-$scope.measurements[i].height;
 				var measurementX = startX;
-				
+
 				if ($scope.measurements[i].height > 0) {
-				
+
 					if ($scope.measurements[i].height > height) {
 						measurementY += height;
 						measurementX = startX*2;
 					}
-	
+
 					// draw main tick marks
 					doc.line(measurementX, measurementY, measurementX+lineLength, measurementY);
-	
+
 					// add main volume numbers
 					doc.text(measurementX+lineLength+lineBuffer, measurementY+fontSizeUnits/2, $scope.measurements[i].volume.toString());
-	
+
 					if ($scope.measurements[i].height === height) {
 						measurementY += height;
 						measurementX = startX*2;
-	
+
 						// draw main tick marks
 						doc.line(measurementX, measurementY, measurementX+lineLength, measurementY);
-	
+
 						// add main volume numbers
 						doc.text(measurementX+lineLength+lineBuffer, measurementY+fontSizeUnits/2, $scope.measurements[i].volume.toString());
 					}
-					
-	
+
+
 					// draw intervals between main tick marks
 					if (i < $scope.measurements.length-1) {
 						interval = ($scope.measurements[i+1].height-$scope.measurements[i].height)/4;
-	
+
 						for (var ii=1; ii<4; ii++) {
-	
+
 							// draw intervals before first tick mark
 							if (first) {
 								measurementY = startY+height-$scope.measurements[i].height+interval;
-								
+
 								while (measurementY < startY+height) {
 									doc.line(startX, measurementY, startX+lineLength/2, measurementY);
 									measurementY += interval;
 								}
-								
+
 								first = false;
 							}
-	
+
 							measurementY = startY+height-$scope.measurements[i].height-interval*ii;
-	
+
 							if (measurementY < startY) {
 								measurementY += height;
 								measurementX = startX*2;
 							}
-	
+
 							doc.line(measurementX, measurementY, measurementX+lineLength/2, measurementY);
-	
+
 							if (measurementY === startY) {
 								measurementY += height;
 								measurementX = startX*2;
-	
+
 								doc.line(measurementX, measurementY, measurementX+lineLength/2, measurementY);
 							}
 						}
